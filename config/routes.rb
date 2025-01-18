@@ -9,9 +9,6 @@ Rails.application.routes.draw do
   # root "posts#index"
   namespace :api do
     namespace :v1 do
-      namespace :coupons, except: [:destroy] do
-
-      end
       namespace :items do
         resources :find, only: :index, controller: :search, action: :show
         resources :find_all, only: :index, controller: :search
@@ -24,6 +21,7 @@ Rails.application.routes.draw do
         resources :find_all, only: :index, controller: :search
       end
       resources :merchants, except: [:new, :edit] do
+        resources :coupons, except: [:destroy], controller: "mercahnts/coupons"
         resources :items, only: :index, controller: "merchants/items"
         resources :customers, only: :index, controller: "merchants/customers"
         resources :invoices, only: :index, controller: "merchants/invoices"

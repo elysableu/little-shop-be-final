@@ -3,7 +3,7 @@ require "rails_helper"
 describe "Coupon Endpoints", :type => :request do
   let(:merchant) { Merchant.create!(name: "Lula Faye") }
 
-  describe "GET all coupons" do
+  describe "GET all merchants coupons" do
 
   end
 
