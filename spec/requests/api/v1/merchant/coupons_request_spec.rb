@@ -134,12 +134,39 @@ describe "Coupon Endpoints", :type => :request do
   end
 
   describe "Update coupon status" do
-    describe "Active to Inactive" do
-      
-    end
-
     describe "Inactive to Active" do
+      it "should update active status from true to false" do
+        active_status = false
+        body = {
+          active: active_status
+        }
 
+        patch "/api/v1/merchants/#{merchant1.id}/coupons/#{@coupon1.id}", params: body, as: :json
+        json = JSON.parse(response.body, symbolize_names: :true)
+
+        expect(response).to have_http_status(:ok)
+        expect(json[:data][:attributes][:active]).to eq(active_status)
+      end
+
+      it "should return 404 when id provided is not valid" do
+        test_id = 99999
+        active_status = false
+        body = {
+          active: active_status
+        }
+
+        patch "/api/v1/merchants/#{merchant1.id}/coupons/#{test_id}", params: body, as: :json
+        json = JSON.parse(response.body, symbolize_names: :true)
+
+        expect(response).to have_http_status(:not_found)
+        expect(json[:errors].first).to eq("Couldn't find Coupon with 'id'=#{test_id}")
+      end
+    end
+  
+    describe "Active to Inactive" do
+      it "should udpate active status from false to true" do
+        
+      end
     end
   end
 end
