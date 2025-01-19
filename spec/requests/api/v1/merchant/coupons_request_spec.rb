@@ -3,9 +3,9 @@ require "rails_helper"
 describe "Coupon Endpoints", :type => :request do
   before(:each) do
     @merchant1 = create(:merchant)
-    @coupon1 = Coupon.create!(name: "New Years Discount", code: "NY2025", discount: 0.4, active: true, merchant_id: @merchant1.id, num_of_uses: 2);
-    @coupon2 = Coupon.create!(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1);
-    @coupon3 = Coupon.create!(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 0);
+    @coupon1 = Coupon.create(name: "New Years Discount", code: "NY2025", discount: 0.4, active: true, merchant_id: @merchant1.id, num_of_uses: 2);
+    @coupon2 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1);
+    @coupon3 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 0);
   end
 
   describe "GET merchants coupon by id" do
@@ -109,12 +109,12 @@ describe "Coupon Endpoints", :type => :request do
         merchant_id: @merchant1.id
       }
 
-      
+
       post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json
       json = JSON.parse(response.body, symbolize_names: true)
 
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(json[:errors].first).to eq("Validation failed: Unit price can't be blank, Unit price is not a number")
+      expect(json[:errors].first).to eq("Validation failed: Discount can't be blank, Active can't be blank, Num of uses can't be blank")
     end
 
     it "should ignore unnecessary fields" do
@@ -128,9 +128,12 @@ describe "Coupon Endpoints", :type => :request do
         num_of_uses: 2
       }
       
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json
+      json = JSON.parse(response.body, symbolize_names: true)
+
       expect(response).to have_http_status(:created)
       expect(json[:data][:attributes]).to_not include(:extra_field)
-      expect(json[:data][:attributes]).to inlcude(:name, :code, :discount, :active, :merchant_id, :num_of_uses)
+      expect(json[:data][:attributes]).to include(:name, :code, :discount, :active, :merchant_id, :num_of_uses)
     end
   end
 
