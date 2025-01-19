@@ -61,7 +61,7 @@ describe "Coupon Endpoints", :type => :request do
     it "should return a 404 and error meassge when merchant is not found" do
       test_id = 999999
       
-      get "/api/v1/merchants/#{test_id}/couponss"
+      get "/api/v1/merchants/#{test_id}/coupons"
 
       json = JSON.parse(response.body, symbolize_names: true)
 
