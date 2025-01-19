@@ -61,7 +61,7 @@ describe "Coupon Endpoints", :type => :request do
     it "should return a 404 and error meassge when merchant is not found" do
       test_id = 999999
       
-      get "/api/v1/merchants/#{test_id}/items"
+      get "/api/v1/merchants/#{test_id}/couponss"
 
       json = JSON.parse(response.body, symbolize_names: true)
 
@@ -72,7 +72,7 @@ describe "Coupon Endpoints", :type => :request do
     end
   end
 
-  describe "Create coupon" do
+  describe "POST Create coupon" do
     it "should create a coupon for a merchant when all fields are provided" do
       name = "Winter Holiday Sale"
       code = "WINTER_HOL_2024"
@@ -90,7 +90,7 @@ describe "Coupon Endpoints", :type => :request do
       }
 
       post "/api/v1/merhcants/#{@merchant1.id}/coupons", params: body, as: :json
-      json = JSON.parse (response.body, symbolize_names: true)
+      json = JSON.parse(response.body, symbolize_names: true)
       target = json.last
 
       expect(response).to have_http_status(:created)
