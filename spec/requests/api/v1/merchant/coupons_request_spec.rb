@@ -73,12 +73,69 @@ describe "Coupon Endpoints", :type => :request do
   end
 
   describe "Create coupon" do
+    it "should create a coupon for a merchant when all fields are provided" do
+      name = "Winter Holiday Sale"
+      code = "WINTER_HOL_2024"
+      discount = 0.6
+      active = true
+      merchant_id = @merchant1.id
+      num_of_uses = 1
+      body = {
+        name: name,
+        code: code,
+        discount: discount,
+        active: active,
+        merchant_id: merchant_id,
+        num_of_uses: num_of_uses
+      }
 
+      post "/api/v1/merhcants/#{@merchant1.id}/coupons", params: body, as: :json
+      json = JSON.parse (response.body, symbolize_names: true)
+      target = json.last
+
+      expect(response).to have_http_status(:created)
+      expect(target[:data][:attributes][:name]).to eq(name)
+      expect(target[:data][:attributes][:code]).to eq(code)
+      expect(target[:data][:attributes][:discount]).to eq(discount)
+      expect(target[:data][:attributes][:active]).to eq(active)
+      expect(target[:data][:attributes][:merchant_id]).to eq(merchant_id)
+      expect(target[:data][:attributes][:num_of_uses]).to eq(num_of_uses)
+    end
+
+    it "should display an error message if not all fields are present" do
+      body = {
+        name: "name",
+        code: "code",
+        merchant_id: merchant.id
+      }
+
+      post "/api/v1/merhcants/#{@merchant1.id}/coupons", params: body, as: :json
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json[:errors].first).to eq("Validation failed: Unit price can't be blank, Unit price is not a number")
+    end
+
+    it "should ignore unnecessary fields" do
+      body = {
+        name: "name",
+        code: "code2",
+        discount: 0.5,
+        active: true,
+        extra_field: "bad stuff",
+        merchant_id: @merchant1.id,
+        num_of_uses: 2
+      }
+      
+      expect(response).to have_http_status(:created)
+      expect(json[:data][:attributes]).to_not include(:extra_field)
+      expect(json[:data][:attributes]).to inlcude(:name, :code, :discount, :active, :merchant_id, :num_of_uses)
+    end
   end
 
   describe "Update coupon status" do
     describe "Active to Inactive" do
-
+      
     end
 
     describe "Inactive to Active" do
