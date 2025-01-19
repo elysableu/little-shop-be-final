@@ -2,7 +2,7 @@ class Coupon < ApplicationRecord
   validates :name, presence: true
   validates :code, presence: true
   validates :discount, presence: true
-  validates :active, presence: true
+  validates :active, inclusion: { in: [true, false] }
   validates :merchant_id, presence: true
   validates :num_of_uses, presence: true
   belongs_to :merchant
