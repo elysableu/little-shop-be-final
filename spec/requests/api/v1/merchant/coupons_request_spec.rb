@@ -145,7 +145,7 @@ describe "Coupon Endpoints", :type => :request do
           active: active_status
         }
 
-        patch "/api/v1/merchants/#{merchant1.id}/coupons/#{@coupon1.id}", params: body, as: :json
+        patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{@coupon1.id}", params: body, as: :json
         json = JSON.parse(response.body, symbolize_names: :true)
 
         expect(response).to have_http_status(:ok)
@@ -160,7 +160,7 @@ describe "Coupon Endpoints", :type => :request do
           active: active_status
         }
 
-        patch "/api/v1/merchants/#{merchant1.id}/coupons/#{@coupon3.id}", params: body, as: :json
+        patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{@coupon3.id}", params: body, as: :json
         json = JSON.parse(response.body, symbolize_names: :true)
 
         expect(response).to have_http_status(:ok)
@@ -175,7 +175,7 @@ describe "Coupon Endpoints", :type => :request do
         active: active_status
       }
 
-      patch "/api/v1/merchants/#{merchant1.id}/coupons/#{test_id}", params: body, as: :json
+      patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{test_id}", params: body, as: :json
       json = JSON.parse(response.body, symbolize_names: :true)
 
       expect(response).to have_http_status(:not_found)
