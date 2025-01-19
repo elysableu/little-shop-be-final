@@ -89,27 +89,28 @@ describe "Coupon Endpoints", :type => :request do
         num_of_uses: num_of_uses
       }
 
-      post "/api/v1/merhcants/#{@merchant1.id}/coupons", params: body, as: :json
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json
       json = JSON.parse(response.body, symbolize_names: true)
-      target = json.last
+      
 
       expect(response).to have_http_status(:created)
-      expect(target[:data][:attributes][:name]).to eq(name)
-      expect(target[:data][:attributes][:code]).to eq(code)
-      expect(target[:data][:attributes][:discount]).to eq(discount)
-      expect(target[:data][:attributes][:active]).to eq(active)
-      expect(target[:data][:attributes][:merchant_id]).to eq(merchant_id)
-      expect(target[:data][:attributes][:num_of_uses]).to eq(num_of_uses)
+      expect(json[:data][:attributes][:name]).to eq(name)
+      expect(json[:data][:attributes][:code]).to eq(code)
+      expect(json[:data][:attributes][:discount]).to eq(discount)
+      expect(json[:data][:attributes][:active]).to eq(active)
+      expect(json[:data][:attributes][:merchant_id]).to eq(merchant_id)
+      expect(json[:data][:attributes][:num_of_uses]).to eq(num_of_uses)
     end
 
     it "should display an error message if not all fields are present" do
       body = {
         name: "name",
         code: "code",
-        merchant_id: merchant.id
+        merchant_id: @merchant1.id
       }
 
-      post "/api/v1/merhcants/#{@merchant1.id}/coupons", params: body, as: :json
+      
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json
       json = JSON.parse(response.body, symbolize_names: true)
 
       expect(response).to have_http_status(:unprocessable_entity)
