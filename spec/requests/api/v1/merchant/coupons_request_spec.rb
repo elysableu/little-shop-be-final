@@ -60,11 +60,12 @@ describe "Coupon Endpoints", :type => :request do
 
     it "should return all coupons filtered by active status" do
       get "/api/v1/merchants/#{@merchant1.id}/coupons?status=active"
-      json = JSON.params(response.body, symbolize_names: true)
+      json = JSON.parse(response.body, symbolize_names: true)
 
       expect(response).to have_http_status(:ok)
       expect(json[:data].count).to eq(2)
-      expect(json[:data]).to eq([@coupon1, @coupon2])
+      expect(json[:data][0][:id]).to eq(@coupon1.id.to_s)
+      expect(json[:data][1][:id]).to eq(@coupon2.id.to_s)
     end
 
     it "should return a 404 and error meassge when merchant is not found" do
