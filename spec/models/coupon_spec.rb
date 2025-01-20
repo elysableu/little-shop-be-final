@@ -30,12 +30,14 @@ describe Coupon, type: :model do
   describe 'apply coupon' do
     before(:each) do
       @customer = create(:customer)
-      @merchant = create(:merchant)
-      @coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant.id, num_of_uses: 1)
-      @coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant.id, num_of_uses: 3)
-      
-      @invoice1 = Invoice.create(status: "packaged", merchant_id: @merchant.id, customer_id: @customer.id, coupon_id: nil)
-      @invoice2 = Invoice.create(status: "packaged", merchant_id: @merchant.id, customer_id: @customer.id, coupon_id: nil)
+      @merchant1 = create(:merchant)
+      @merchant2 = create(:merchant)
+      @coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1)
+      @coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 3)
+      @coupon3 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant2.id, num_of_uses: 3);
+
+      @invoice1 = Invoice.create(status: "packaged", merchant_id: @merchant1.id, customer_id: @customer.id, coupon_id: nil)
+      @invoice2 = Invoice.create(status: "packaged", merchant_id: @merchant1.id, customer_id: @customer.id, coupon_id: nil)
     end
 
     it 'should apply coupon to an invoice and update coupon_id for invoice' do
@@ -51,6 +53,10 @@ describe Coupon, type: :model do
 
       @coupon2.apply_coupon(@invoice2)
       expect(@coupon2.num_of_uses).to eq(5)
+    end
+
+    it 'should throw an error if the coupon merchant_id is not the same as invoices merchant_id' do
+      expect{ @coupon3.apply_coupon(@invoice1) }.to raise_error(ArgumentError, "Merchant IDs for both the coupon and invoice must match")
     end
   end 
 end
