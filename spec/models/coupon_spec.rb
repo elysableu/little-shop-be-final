@@ -33,11 +33,13 @@ describe Coupon, type: :model do
         @customer = create(:customer)
         @merchant = create(:merchant)
         @coupon = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant.id, num_of_uses: 1);
-        @invoice1 = create(:invoice, status: "packaged", merchant_id: @merchant.id, customer_id: @customer.id, coupon_id: null)
-        @invoice2 = create(:invoice, status: "packaged", merchant_id: @merchant.id, customer_id: @customer.id, coupon_id: null)
+        
+        @invoice1 = Invoice.create(status: "packaged", merchant_id: @merchant.id, customer_id: @customer.id, coupon_id: nil)
+        @invoice2 = Invoice.create(status: "packaged", merchant_id: @merchant.id, customer_id: @customer.id, coupon_id: nil)
       end
+
       it 'should apply coupon to an invoice and update coupon_id for invoice' do
-        expect(@invoice1.coupon_id).to eq(null)
+        expect(@invoice1.coupon_id).to eq(nil)
 
         @coupon.apply_coupon(@invoice1)
         expect(@invoice1.coupon_id).to eq(@coupon.id)
