@@ -19,6 +19,22 @@ class Merchant < ApplicationRecord
     items.count
   end
 
+  def coupon_count
+    coupons.count
+  end
+
+  def invoice_coupon_count
+    count = 0
+
+    invoices.each do |invoice|
+      if invoice.coupon_id != nil
+        count += 1
+      end
+     end
+     
+     count
+  end
+
   def distinct_customers
     # self.customers.distinct # This is possible due to the additional association on line 5
     
