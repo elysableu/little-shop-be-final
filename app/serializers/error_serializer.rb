@@ -12,4 +12,11 @@ class ErrorSerializer
       errors: ["invalid search params"] 
     }
   end
+
+  def self.invalid_request(message) 
+    {
+      message: "Your request is invalid and can not be completed",
+      errors: [message]
+    }
+  end
 end
