@@ -184,9 +184,9 @@ describe "Coupon Endpoints", :type => :request do
       end
 
       it "should return an error if the merchant already has 5 active coupons" do
-        coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0);
-        coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", percent_discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0);
-        coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", percent_discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2, dollar_discount: 0);
+        coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
+        coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", percent_discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
+        coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", percent_discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2, dollar_discount: 0)
 
         active_status = true
         body = {

@@ -22,12 +22,14 @@ class Coupon < ApplicationRecord
   def apply_coupon(invoice) 
     if merchant_id != invoice.merchant_id
       raise ArgumentError, "Merchant IDs for both the coupon and invoice must match"
+    elsif self.active == false 
+      raise StandardError, "Coupon must be active to be applied to an invoice"
+    else 
+      invoice.update(coupon_id: id)
+
+      self.num_of_uses ||= 0
+      self.num_of_uses += 1
+      save!
     end
-
-    invoice.update(coupon_id: id)
-
-    self.num_of_uses ||= 0
-    self.num_of_uses += 1
-    save!
   end
 end
