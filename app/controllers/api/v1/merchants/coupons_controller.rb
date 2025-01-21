@@ -7,7 +7,13 @@ class Api::V1::Merchants::CouponsController < ApplicationController
 
   def index
     merchant = Merchant.find(params[:merchant_id])
-    render json: CouponSerializer.new(merchant.coupons)
+    if params[:status].present?
+      coupons = merchant.coupons.filter_by_active_status(params[:status])
+    else
+      coupons = merchant.coupons
+    end
+
+    render json: CouponSerializer.new(coupons)
   end
 
   def create
@@ -24,16 +30,21 @@ class Api::V1::Merchants::CouponsController < ApplicationController
 
       render json: CouponSerializer.new(coupon), status: :ok
     else
-      coupon.update(active: true)
-      coupon.save
+      merchant = Merchant.find(coupon.merchant_id)
+      if merchant.coupon_count > 5
+        render json: ErrorSerializer.invalid_request("This merchant already has 5 active coupons, no more can be activated")
+      else
+        coupon.update(active: true)
+        coupon.save
 
-      render json: CouponSerializer.new(coupon), status: :ok
+        render json: CouponSerializer.new(coupon), status: :ok
+      end
     end
   end
 
   private
 
   def coupon_params
-    params.permit(:name, :code, :discount, :active, :merchant_id, :num_of_uses)
+    params.permit(:name, :code, :percent_discount, :active, :merchant_id, :num_of_uses, :dollar_discount)
   end
 end

@@ -2,7 +2,7 @@ class Merchant < ApplicationRecord
   validates_presence_of :name
   has_many :items, dependent: :destroy
   has_many :invoices, dependent: :destroy
-  has_many :coupons
+  has_many :coupons, dependent: :destroy
   has_many :customers, through: :invoices
   # has_many :invoice_items, through: :invoices
   # has_many :transactions, through: :invoices
@@ -17,6 +17,22 @@ class Merchant < ApplicationRecord
 
   def item_count
     items.count
+  end
+
+  def coupon_count
+    coupons.count
+  end
+
+  def invoice_coupon_count
+    count = 0
+
+    invoices.each do |invoice|
+      if invoice.coupon_id != nil
+        count += 1
+      end
+     end
+     
+     count
   end
 
   def distinct_customers

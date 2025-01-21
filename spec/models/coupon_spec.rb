@@ -5,9 +5,10 @@ describe Coupon, type: :model do
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:code) }
     it { should validate_uniqueness_of(:code) }
-    it { should validate_presence_of(:discount) }
+    it { should validate_presence_of(:percent_discount) }
     it { should validate_inclusion_of(:active).in_array([true, false]) }
-    it { should validate_presence_of (:num_of_uses) }
+    it { should validate_presence_of(:num_of_uses) }
+    it { should validate_presence_of(:dollar_discount)}
   end
 
   describe 'relationships' do
@@ -15,48 +16,53 @@ describe Coupon, type: :model do
     it { should have_many :invoices }
   end
 
-  describe 'filter by active status' do
-    it 'should filter a merchant\'s coupons by active status' do
-      merchant = create(:merchant)
-      coupon1 = Coupon.create(name: "New Years Discount", code: "NY2025", discount: 0.4, active: true, merchant_id: merchant.id, num_of_uses: 2);
-      coupon2 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: merchant.id, num_of_uses: 1);
-      coupon3 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: merchant.id, num_of_uses: 3);
-
-      expect(merchant.coupons.filter_by_active_status("active")).to eq([coupon1, coupon2])
-      expect(merchant.coupons.filter_by_active_status("inactive")).to eq([coupon3])
-    end
-  end
-
-  describe 'apply coupon' do
+  describe 'behaviors' do
     before(:each) do
       @customer = create(:customer)
       @merchant1 = create(:merchant)
       @merchant2 = create(:merchant)
-      @coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1)
-      @coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 3)
-      @coupon3 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant2.id, num_of_uses: 3);
+      @coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
+      @coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", percent_discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
+      @coupon3 = Coupon.create(name: "New Years Discount", code: "NY2025", percent_discount: 0.4, active: true, merchant_id: @merchant2.id, num_of_uses: 2, dollar_discount: 0)
+      @coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: false, merchant_id: @merchant2.id, num_of_uses: 1, dollar_discount: 0)
+
 
       @invoice1 = Invoice.create(status: "packaged", merchant_id: @merchant1.id, customer_id: @customer.id, coupon_id: nil)
       @invoice2 = Invoice.create(status: "packaged", merchant_id: @merchant1.id, customer_id: @customer.id, coupon_id: nil)
     end
 
-    it 'should apply coupon to an invoice and update coupon_id for invoice' do
-      expect(@invoice1.coupon_id).to eq(nil)
-
-      @coupon1.apply_coupon(@invoice1)
-      expect(@invoice1.coupon_id).to eq(@coupon1.id)
+    describe 'filter by active status' do
+      it 'should filter a merchant\'s coupons by active status' do
+        active_results = @merchant1.coupons.filter_by_active_status("active")
+        inactive_results = @merchant2.coupons.filter_by_active_status("inactive")
+        expect(active_results[0][:id]).to eq(@coupon1.id)
+        expect(inactive_results[0][:id]).to eq(@coupon4.id)
+      end
     end
 
-    it 'should increase the num of uses for that coupon' do
-      @coupon2.apply_coupon(@invoice1)
-      expect(@coupon2.num_of_uses).to eq(4)
+    describe 'apply coupon' do
+      it 'should apply coupon to an invoice and update coupon_id for invoice' do
+        expect(@invoice1.coupon_id).to eq(nil)
 
-      @coupon2.apply_coupon(@invoice2)
-      expect(@coupon2.num_of_uses).to eq(5)
-    end
+        @coupon1.apply_coupon(@invoice1)
+        expect(@invoice1.coupon_id).to eq(@coupon1.id)
+      end
 
-    it 'should throw an error if the coupon merchant_id is not the same as invoices merchant_id' do
-      expect{ @coupon3.apply_coupon(@invoice1) }.to raise_error(ArgumentError, "Merchant IDs for both the coupon and invoice must match")
-    end
-  end 
+      it 'should increase the num of uses for that coupon' do
+        @coupon1.apply_coupon(@invoice1)
+        expect(@coupon1.num_of_uses).to eq(2)
+
+        @coupon1.apply_coupon(@invoice2)
+        expect(@coupon1.num_of_uses).to eq(3)
+      end
+
+      it 'should throw an error if the coupon merchant_id is not the same as invoices merchant_id' do
+        expect{ @coupon3.apply_coupon(@invoice1) }.to raise_error(ArgumentError, "Merchant IDs for both the coupon and invoice must match")
+      end
+
+      it 'should throw an error if the coupon is inactive' do
+        expect{ @coupon2.apply_coupon(@invoice2) }.to raise_error(StandardError, "Coupon must be active to be applied to an invoice")
+      end
+    end 
+  end
 end
