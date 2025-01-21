@@ -148,7 +148,7 @@ describe "Coupon Endpoints", :type => :request do
   end
 
   describe "Update coupon status" do
-    describe "Inactive to Active" do
+    describe "Active to Inactive" do
       it "should update active status from true to false" do
         active_status = false
         body = {
@@ -163,7 +163,7 @@ describe "Coupon Endpoints", :type => :request do
       end
     end
   
-    describe "Active to Inactive" do
+    describe "Inactive to Active" do
       it "should udpate active status from false to true" do
         active_status = true
         body = {
@@ -175,6 +175,23 @@ describe "Coupon Endpoints", :type => :request do
 
         expect(response).to have_http_status(:ok)
         expect(json[:data][:attributes][:active]).to eq(active_status)
+      end
+
+      it "should return an error if the merchant already has 5 active coupons" do
+        coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1);
+        coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3);
+        coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2);
+
+        active_status = true
+        body = {
+          active: active_status
+        }
+
+        patch "/api/v1/merchants/#{@merchants1.id}/coupons/#{@coupon3.id}", params: body, as: :json
+        json = JSON.parse(response.body, symbolize_names: :true)
+
+        expect(response).to_not be_successful
+        expect(json[:errors].first).to eq("This merchant already has 5 active coupons, no more can be activated")
       end
     end
 
