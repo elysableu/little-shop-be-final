@@ -59,6 +59,35 @@ describe Merchant, type: :model do
       expect(merchant2.item_count).to eq(4)
     end
 
+    it "#coupon_count should return the total count of coupons for a merchant" do
+      merchant1 = create(:merchant)
+      merchant2 = create(:merchant)
+      coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: merchant1.id, num_of_uses: 1)
+      coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: merchant1.id, num_of_uses: 3)
+      coupon3 = Coupon.create(name: "New Years Discount", code: "NY2025", discount: 0.4, active: false, merchant_id: merchant2.id, num_of_uses: 2)
+  
+      expect(merchant1.coupon_count).to eq(2)
+      expect(merchant2.coupon_count).to eq(1)
+    end
+
+    it "#invoice_coupon_count should return the total count of invoices with applied coupons" do
+      customer1 = create(:customer)
+      customer2 = create(:customer)
+      merchant1 = create(:merchant)
+      merchant2 = create(:merchant)
+
+      coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: merchant1.id, num_of_uses: 1)
+      coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: true, merchant_id: merchant1.id, num_of_uses: 3)
+      coupon3 = Coupon.create(name: "New Years Discount", code: "NY2025", discount: 0.4, active: true, merchant_id: merchant2.id, num_of_uses: 2)
+      
+      invoice1 = Invoice.create(status: "packaged", merchant_id: merchant1.id, customer_id: customer1.id, coupon_id: coupon1.id)
+      invoice2 = Invoice.create(status: "packaged", merchant_id: merchant1.id, customer_id: customer1.id, coupon_id: coupon2.id)
+      invoice3 = Invoice.create(status: "packaged", merchant_id: merchant2.id, customer_id: customer2.id, coupon_id: coupon3.id)
+
+      expect(merchant1.invoice_coupon_count).to eq(2)
+      expect(merchant2.invoice_coupon_count).to eq(1)
+    end
+
     it "#distinct_customers should return all customers for a merchant" do
       merchant1 = create(:merchant)
       customer1 = create(:customer)
