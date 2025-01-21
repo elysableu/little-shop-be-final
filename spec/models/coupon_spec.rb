@@ -20,9 +20,9 @@ describe Coupon, type: :model do
       @customer = create(:customer)
       @merchant1 = create(:merchant)
       @merchant2 = create(:merchant)
-      @coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1)
-      @coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 3)
-      @coupon3 = Coupon.create(name: "New Years Discount", code: "NY2025", discount: 0.4, active: true, merchant_id: @merchant2.id, num_of_uses: 2)
+      @coupon1 = Coupon.create(name: "Valentines Gift Sale", code: "FEB14LOVE", discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
+      @coupon2 = Coupon.create(name: "Spring Celebration BOGO", code: "SPRBOGO25", discount: 0.5, active: false, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
+      @coupon3 = Coupon.create(name: "New Years Discount", code: "NY2025", discount: 0.4, active: true, merchant_id: @merchant2.id, num_of_uses: 2, dollar_discount: 0)
 
       @invoice1 = Invoice.create(status: "packaged", merchant_id: @merchant1.id, customer_id: @customer.id, coupon_id: nil)
       @invoice2 = Invoice.create(status: "packaged", merchant_id: @merchant1.id, customer_id: @customer.id, coupon_id: nil)
