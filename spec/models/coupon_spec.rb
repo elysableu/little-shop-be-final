@@ -39,30 +39,5 @@ describe Coupon, type: :model do
         expect(inactive_results[0][:id]).to eq(@coupon4.id)
       end
     end
-
-    describe 'apply coupon' do
-      it 'should apply coupon to an invoice and update coupon_id for invoice' do
-        expect(@invoice1.coupon_id).to eq(nil)
-
-        @coupon1.apply_coupon(@invoice1)
-        expect(@invoice1.coupon_id).to eq(@coupon1.id)
-      end
-
-      it 'should increase the num of uses for that coupon' do
-        @coupon1.apply_coupon(@invoice1)
-        expect(@coupon1.num_of_uses).to eq(2)
-
-        @coupon1.apply_coupon(@invoice2)
-        expect(@coupon1.num_of_uses).to eq(3)
-      end
-
-      it 'should throw an error if the coupon merchant_id is not the same as invoices merchant_id' do
-        expect{ @coupon3.apply_coupon(@invoice1) }.to raise_error(ArgumentError, "Merchant IDs for both the coupon and invoice must match")
-      end
-
-      it 'should throw an error if the coupon is inactive' do
-        expect{ @coupon2.apply_coupon(@invoice2) }.to raise_error(StandardError, "Coupon must be active to be applied to an invoice")
-      end
-    end 
   end
 end

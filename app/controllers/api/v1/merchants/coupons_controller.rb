@@ -30,15 +30,10 @@ class Api::V1::Merchants::CouponsController < ApplicationController
 
       render json: CouponSerializer.new(coupon), status: :ok
     else
-      merchant = Merchant.find(coupon.merchant_id)
-      if merchant.coupon_count > 5
-        render json: ErrorSerializer.invalid_request("This merchant already has 5 active coupons, no more can be activated")
-      else
-        coupon.update(active: true)
-        coupon.save
+      coupon.update(active: true)
+      coupon.save
 
-        render json: CouponSerializer.new(coupon), status: :ok
-      end
+      render json: CouponSerializer.new(coupon), status: :ok
     end
   end
 
