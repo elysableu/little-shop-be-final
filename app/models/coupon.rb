@@ -9,6 +9,8 @@ class Coupon < ApplicationRecord
   belongs_to :merchant
   has_many :invoices
 
+  before_save :enforce_limit_active_coupons
+
   def self.filter_by_active_status(status) 
     if status == "active"
       filteredCoupons = self.where("coupons.active = ?", true).select("distinct coupons.*")
@@ -19,17 +21,18 @@ class Coupon < ApplicationRecord
     return filteredCoupons
   end
 
-  def apply_coupon(invoice) 
-    if merchant_id != invoice.merchant_id
-      raise ArgumentError, "Merchant IDs for both the coupon and invoice must match"
-    elsif self.active == false 
-      raise StandardError, "Coupon must be active to be applied to an invoice"
-    else 
-      invoice.update(coupon_id: id)
+  private
 
-      self.num_of_uses ||= 0
-      self.num_of_uses += 1
-      save!
+  def enforce_limit_active_coupons
+    return unless merchant
+
+    active_count = merchant.coupons.where(active: true).count
+    
+    if active? && (new_record? || active_changed?(from: false, to: true))
+      if active_count >= 5
+        raise ActiveRecord::RecordNotSaved.new(self), "Coupon could not be saved due to active coupon limit"
+        throw(:abort)
+      end
     end
   end
 end

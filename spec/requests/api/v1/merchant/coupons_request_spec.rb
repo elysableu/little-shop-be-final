@@ -161,7 +161,31 @@ describe "Coupon Endpoints", :type => :request do
       expect(json[:data][:attributes]).to include(:name, :code, :percent_discount, :active, :merchant_id, :num_of_uses, :dollar_discount)
     end
 
-    xit "should return an error if merchant already has 5 active coupons" do
+    it "should return an error if merchant already has 5 active coupons" do
+      coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
+      coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", percent_discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
+      coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", percent_discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2, dollar_discount: 0)
+    
+      body = {
+        name: "Winter Holiday Sale",
+        code: "WINTER_HOL_2024",
+        percent_discount: 0.6,
+        active: true,
+        merchant_id: @merchant1.id,
+        num_of_uses: 1,
+        dollar_discount: 0.0
+      }
+
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json
+      json = JSON.parse(response.body, symbolize_names: :true)
+      
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json[:message]).to eq("Your query could not be completed")
+      expect(json[:errors]).to be_a Array
+      expect(json[:errors].first).to eq("Coupon could not be saved due to active coupon limit")
+    end
+
+    it "should not create an active coupon to a merchant if they already have 5 active" do
       coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
       coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", percent_discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
       coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", percent_discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2, dollar_discount: 0)
@@ -177,11 +201,10 @@ describe "Coupon Endpoints", :type => :request do
       }
 
       expect(@merchant1.coupons.filter_by_active_status("active").count).to eq(5)
+
       post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json
-      json = JSON.parse(response.body, symbolize_names: :true)
-    
-      # expect{ post "/api/v1/merchants/#{@merchant1.id}/coupons", params: body, as: :json }.to raise_error(StandardError, "This merchant already has 5 active coupons, no more can be activated")
-      expect(@merchant1.coupon_count).to eq(5)
+      
+      expect(@merchant1.coupons.filter_by_active_status("active").count).to eq(5)
     end
   end
 
@@ -215,16 +238,38 @@ describe "Coupon Endpoints", :type => :request do
         expect(json[:data][:attributes][:active]).to eq(active_status)
       end
 
-      xit "should return an error if the merchant already has 5 active coupons" do
+      it "should return an error if merchant already has 5 active coupons" do
         coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
         coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", percent_discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
         coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", percent_discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2, dollar_discount: 0)
-        active_status = true
+      
         body = {
-          active: active_status
+          active: true
         }
 
-        expect{ patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{@coupon3.id}", params: body, as: :json }.to raise_error(StandardError, "This merchant already has 5 active coupons, no more can be activated")
+        patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{@coupon3.id}", params: body, as: :json
+        json = JSON.parse(response.body, symbolize_names: :true)
+        
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json[:message]).to eq("Your query could not be completed")
+        expect(json[:errors]).to be_a Array
+        expect(json[:errors].first).to eq("Coupon could not be saved due to active coupon limit")
+      end
+  
+      it "should not update an merchants coupon to active if they already have 5 active" do
+        coupon4 = Coupon.create(name: "Predisdents Weekend Sale", code: "PDSale", percent_discount: 0.25, active: true, merchant_id: @merchant1.id, num_of_uses: 1, dollar_discount: 0)
+        coupon5 = Coupon.create(name: "Easter Sale", code: "BigBunny25", percent_discount: 0.3, active: true, merchant_id: @merchant1.id, num_of_uses: 3, dollar_discount: 0)
+        coupon6 = Coupon.create(name: "Spirit Halloween Close Out", code: "BOO2024", percent_discount: 0.75, active: true, merchant_id: @merchant1.id, num_of_uses: 2, dollar_discount: 0)
+      
+        body = {
+          active: true
+        }
+  
+        expect(@merchant1.coupons.filter_by_active_status("active").count).to eq(5)
+  
+        patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{@coupon3.id}", params: body, as: :json
+        
+        expect(@merchant1.coupons.filter_by_active_status("active").count).to eq(5)
       end
     end
 
